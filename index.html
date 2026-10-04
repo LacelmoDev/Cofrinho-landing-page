@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="pt-AO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cofrinho AO — controlo financeiro em Kwanzas, grátis e sem internet</title>
+<meta name="description" content="Regista os teus gastos e receitas em Kwanzas, define metas de poupança e vê para onde vai o teu dinheiro. Funciona sem internet. Versão experimental gratuita.">
+<meta name="theme-color" content="#0B090D">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_AO">
+<meta property="og:title" content="Cofrinho AO — controlo financeiro em Kwanzas">
+<meta property="og:description" content="Gastos, receitas e metas de poupança. Funciona sem internet. Versão experimental gratuita.">
+<meta property="og:image" content="img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="preload" href="fonts/sora-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="img/inicio.webp" as="image" type="image/webp">
+<script>
+/* Animações só se o JavaScript carregar: se falhar, tudo continua visível. */
+document.documentElement.classList.add("js");
+setTimeout(function(){ if(!window.__ok) document.documentElement.classList.remove("js"); }, 3500);
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Cofrinho AO","applicationCategory":"FinanceApplication","operatingSystem":"Android, iOS, Web","inLanguage":"pt-AO","offers":{"@type":"Offer","price":"0","priceCurrency":"AOA"},"description":"Controlo de gastos, receitas e metas de poupança em Kwanzas, com funcionamento offline."}
+</script>
+<style>
+@font-face{font-family:Sora;font-weight:700;font-display:swap;src:url(fonts/sora-700.woff2) format("woff2")}
+@font-face{font-family:Sora;font-weight:800;font-display:swap;src:url(fonts/sora-800.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
+:root{
+  --bg:#0B090D;--bg2:#120E16;--tx:#F6F1F4;--sec:#B9AEBE;--ln:rgba(255,255,255,.09);--glass:rgba(255,255,255,.045);
+  --rosa:#EC5C82;--rosa2:#B03A5F;--ouro:#F4B740;--ouro2:#E0A02E;--verde:#5FD6A0;
+  --ease:cubic-bezier(.2,.8,.2,1)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 clamp(16px,.35vw + 15px,19px)/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--rosa)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ouro);outline-offset:3px;border-radius:8px}
+.salto{position:absolute;left:-999px;top:0;background:#fff;color:#111;padding:.6rem 1rem;z-index:200;border-radius:0 0 8px 0}.salto:focus{left:0}
+.wrap{width:min(1180px,100% - 2.5rem);margin-inline:auto}
+h1,h2,h3{font-family:Sora,system-ui,sans-serif;font-weight:800;line-height:1.08;letter-spacing:-.03em;margin:0 0 .5em}
+h1{font-size:clamp(2.5rem,6.4vw,5.2rem)}
+h2{font-size:clamp(1.9rem,4.4vw,3.3rem)}
+h3{font-size:1.2rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 1em}.sec{color:var(--sec)}
+.gr{background:linear-gradient(100deg,var(--rosa),var(--ouro) 55%,var(--rosa));background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:-220% 0}}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font:600 .8rem Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);margin-bottom:1rem}
+.eyebrow::before{content:"";width:22px;height:2px;background:var(--ouro);border-radius:2px}
+.centro{text-align:center;max-width:40em;margin-inline:auto}.centro .eyebrow{justify-content:center}
+
+/* ---------- fundo: malha de luz + textura ---------- */
+.mesh{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.mesh i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform}
+.mesh i:nth-child(1){width:46vmax;height:46vmax;left:-12vmax;top:-14vmax;background:#c2436a;animation:b1 24s ease-in-out infinite alternate}
+.mesh i:nth-child(2){width:38vmax;height:38vmax;right:-10vmax;top:18vh;background:#6b2a8a;opacity:.38;animation:b2 30s ease-in-out infinite alternate}
+.mesh i:nth-child(3){width:34vmax;height:34vmax;left:25vw;bottom:-18vmax;background:#c9892a;opacity:.28;animation:b3 28s ease-in-out infinite alternate}
+@keyframes b1{to{transform:translate(14vmax,10vmax) scale(1.15)}}
+@keyframes b2{to{transform:translate(-12vmax,-8vmax) scale(1.2)}}
+@keyframes b3{to{transform:translate(-10vmax,-12vmax) scale(.9)}}
+.grao{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+#prog{position:fixed;top:0;left:0;right:0;height:3px;z-index:120;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--rosa),var(--ouro))}
+
+/* ---------- botões ---------- */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;min-height:54px;padding:.85rem 1.7rem;border-radius:18px;font:600 1rem Inter,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer;overflow:hidden;transition:transform .25s var(--ease),box-shadow .3s,background .3s,border-color .3s}
+.btn:active{transform:scale(.97)}
+.btn-p{background:linear-gradient(135deg,#F7C25A,#E8A12B);color:#2a1d08;box-shadow:0 14px 34px -10px rgba(244,183,64,.65),inset 0 1px 0 rgba(255,255,255,.4)}
+.btn-p::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-120%);animation:sweep 4.5s ease-in-out infinite}
+@keyframes sweep{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.btn-p:hover{box-shadow:0 18px 44px -10px rgba(244,183,64,.85),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-s{background:var(--glass);color:var(--tx);border-color:var(--ln);backdrop-filter:blur(8px)}.btn-s:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09)}
+.btn[aria-disabled=true]{opacity:.6;cursor:default}
+.btn .sta{transition:transform .3s var(--ease)}.btn:hover .sta{transform:translateX(4px)}
+
+/* ---------- cabeçalho ---------- */
+header.hd{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .35s,border-color .35s,backdrop-filter .35s;border-bottom:1px solid transparent}
+header.hd.s{background:rgba(11,9,13,.72);backdrop-filter:blur(16px) saturate(1.4);border-color:var(--ln)}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:74px;transition:min-height .3s}
+.hd.s .topo{min-height:62px}
+.marca{display:flex;align-items:center;gap:.6rem;font:800 1.2rem Sora,sans-serif;color:var(--tx);text-decoration:none}
+.marca img{width:36px;height:36px}.marca b{color:var(--ouro)}
+.selo{display:inline-flex;align-items:center;gap:.5rem;font:600 .78rem Inter;background:var(--glass);border:1px solid var(--ln);color:var(--sec);padding:.3rem .8rem;border-radius:99px;white-space:nowrap;backdrop-filter:blur(8px)}
+.selo i{width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 0 rgba(95,214,160,.7);animation:pulso 2s infinite}
+@keyframes pulso{70%{box-shadow:0 0 0 9px rgba(95,214,160,0)}100%{box-shadow:0 0 0 0 rgba(95,214,160,0)}}
+.topo .btn{min-height:44px;padding:.45rem 1.2rem;border-radius:14px;white-space:nowrap}
+@media(max-width:560px){header .selo{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow-x:clip;min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:clamp(6.5rem,12vh,9rem) 0 4rem}
+.hero .wrap{display:grid;gap:3rem;align-items:center;width:min(1180px,100% - 2.5rem)}
+@media(min-width:900px){.hero .wrap{grid-template-columns:1.1fr .9fr}}
+.hero .sub{font-size:1.18em;color:var(--sec);max-width:32em}
+.hero h1 .w{display:inline-block}
+.js .hero h1 .w{opacity:0;transform:translateY(.55em) scale(.98);filter:blur(10px);animation:wi .9s var(--ease) forwards;animation-delay:calc(var(--i)*80ms + 200ms)}
+@keyframes wi{to{opacity:1;transform:none;filter:blur(0)}}
+.ctas{display:flex;flex-wrap:wrap;gap:.9rem;margin:1.8rem 0 1.1rem}
+.micro{font-size:.9rem;color:var(--sec);display:flex;flex-wrap:wrap;gap:.4rem 1.3rem;margin:0}.micro span::before{content:"✓ ";color:var(--verde);font-weight:700}
+.js .hero .in-up{opacity:0;transform:translateY(22px);animation:up .9s var(--ease) forwards;animation-delay:var(--d,.8s)}
+@keyframes up{to{opacity:1;transform:none}}
+
+.scene{position:relative;display:grid;place-items:center;perspective:1300px;min-height:min(78vh,720px)}
+.ring{position:absolute;width:min(560px,92%);aspect-ratio:1;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(236,92,130,.55),rgba(244,183,64,.45),transparent 70%);filter:blur(46px);animation:giro 16s linear infinite;opacity:.8}
+@keyframes giro{to{transform:rotate(360deg)}}
+.float{animation:flt 7s ease-in-out infinite}
+@keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.tilt{transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.phone{position:relative;width:min(310px,72vw);background:#1b1720;border-radius:46px;padding:10px;border:1px solid rgba(255,255,255,.14);box-shadow:0 50px 90px -30px rgba(236,92,130,.5),0 0 0 1px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,255,255,.04)}
+.phone::before{content:"";position:absolute;left:50%;top:14px;width:84px;height:22px;border-radius:99px;background:#0b090d;transform:translateX(-50%);z-index:2}
+.phone img{border-radius:36px;width:100%}
+.chip{position:absolute;z-index:3;display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;border-radius:18px;background:rgba(24,19,30,.78);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(14px);box-shadow:0 24px 50px -20px rgba(0,0,0,.8);font:600 .86rem Inter;line-height:1.3;white-space:nowrap;transform:translateZ(60px)}
+.chip small{display:block;font:400 .74rem Inter;color:var(--sec)}
+.chip .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:1rem}
+.c1{left:-4%;top:14%;animation:flt 6s ease-in-out infinite}.c1 .ic{background:rgba(95,214,160,.16);color:var(--verde)}
+.c2{right:-6%;top:44%;animation:flt 7.5s ease-in-out -2s infinite;flex-direction:column;align-items:stretch;gap:.45rem;min-width:170px}
+.c3{left:-2%;bottom:10%;animation:flt 8s ease-in-out -4s infinite}.c3 .ic{background:rgba(244,183,64,.16);color:var(--ouro)}
+@media(max-width:560px){.c1{left:-2%;top:8%}.c2{right:-2%;top:46%;min-width:150px}.c3{left:0;bottom:6%}.chip{font-size:.78rem;padding:.55rem .8rem}}
+.bar{height:7px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--rosa),var(--ouro));transition:width 1.6s var(--ease) .4s}
+.hero .bar i{animation:fillbar 1.8s var(--ease) 1.3s forwards}
+@keyframes fillbar{to{width:36%}}
+.rolar{position:absolute;left:50%;bottom:1.4rem;transform:translateX(-50%);width:26px;height:42px;border:2px solid rgba(255,255,255,.3);border-radius:99px;display:none}
+.rolar::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:8px;border-radius:4px;background:var(--tx);transform:translateX(-50%);animation:roda 1.8s infinite}
+@keyframes roda{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,14px)}}
+@media(min-width:900px) and (min-height:760px){.rolar{display:block}}
+
+/* ---------- faixa em movimento ---------- */
+.mq{border-block:1px solid var(--ln);overflow:hidden;background:rgba(255,255,255,.02);-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.mq-t{display:flex;width:max-content;animation:mq 38s linear infinite}.mq:hover .mq-t{animation-play-state:paused}
+.mq-t span{display:inline-flex;align-items:center;gap:1.1rem;padding:1.15rem 1.6rem;font:700 1.05rem Sora,sans-serif;color:var(--sec);white-space:nowrap}
+.mq-t span::after{content:"✦";color:var(--ouro);font-size:.8rem}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- secções ---------- */
+section{position:relative;padding:clamp(4rem,9vw,8rem) 0}
+.rv{transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
+.js .rv{opacity:0;transform:translateY(34px)}.js .rv.in{opacity:1;transform:none}
+
+/* passos */
+.passos{position:relative;display:grid;gap:1.2rem;margin-top:3.2rem}
+@media(min-width:800px){.passos{grid-template-columns:repeat(3,1fr);gap:1.6rem}}
+.passos .linha{display:none}
+@media(min-width:800px){.passos .linha{display:block;position:absolute;left:16%;right:16%;top:calc(1.8rem + 28px);height:2px;background:var(--ln);z-index:0}
+ .passos .linha i{display:block;height:100%;background:linear-gradient(90deg,var(--rosa),var(--ouro));transform-origin:left;transition:transform 1.8s var(--ease) .3s}
+ .js .passos .linha i{transform:scaleX(0)}.js .passos.in .linha i{transform:scaleX(1)}}
+.passo{position:relative;z-index:1;background:linear-gradient(180deg,#1b1620,#130f18);border:1px solid var(--ln);border-radius:26px;padding:1.8rem 1.6rem}
+.passo .n{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font:800 1.5rem Sora;background:linear-gradient(135deg,var(--rosa),var(--rosa2));box-shadow:0 14px 30px -10px rgba(236,92,130,.7);margin-bottom:1.2rem;transition:transform .6s var(--ease)}
+.js .passo .n{transform:scale(.5) rotate(-12deg)}.js .passo.in .n{transform:none}
+.passo p{color:var(--sec);margin:0}
+
+/* storytelling com telemóvel fixo */
+.story-grid{display:grid;gap:2rem;margin-top:3.5rem}
+.sstep{padding:2rem 0}
+.sstep .eyebrow{margin-bottom:.6rem}.sstep p{color:var(--sec);max-width:28em}
+.m-phone{margin:1.8rem auto 0;width:min(260px,70vw)}
+.m-phone .phone{width:100%}
+.story-sticky{display:none}
+@media(min-width:900px){
+  .story-grid{grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+  .sstep{min-height:78vh;display:flex;flex-direction:column;justify-content:center;opacity:.28;transition:opacity .6s,transform .6s var(--ease);transform:translateX(-10px)}
+  .sstep.act{opacity:1;transform:none}
+  .m-phone{display:none}
+  .story-sticky{display:flex;flex-direction:column;align-items:center;gap:1.4rem;position:sticky;top:calc(50vh - 300px);height:600px}
+  .story-sticky .phone{width:290px}
+  .stack{position:relative;aspect-ratio:520/1125}
+  .stack img{position:absolute;inset:0;opacity:0;transform:scale(.96);filter:blur(6px);transition:opacity .6s,transform .8s var(--ease),filter .6s}
+  .stack img.on{opacity:1;transform:none;filter:none}
+  .dots{display:flex;gap:.5rem}.dots i{width:8px;height:8px;border-radius:9px;background:rgba(255,255,255,.2);transition:width .4s var(--ease),background .4s}.dots i.on{width:28px;background:var(--ouro)}
+}
+
+/* demo interactiva */
+.demo-grid{display:grid;gap:3rem;align-items:center}
+@media(min-width:900px){.demo-grid{grid-template-columns:1fr 1fr}}
+.acts{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.6rem 0 1rem}
+.dact{display:inline-flex;align-items:center;gap:.5rem;min-height:48px;padding:.6rem 1.1rem;border-radius:14px;background:var(--glass);border:1px solid var(--ln);cursor:pointer;font:600 .95rem Inter;transition:transform .2s var(--ease),border-color .2s,background .2s}
+.dact:hover{border-color:var(--rosa);background:rgba(236,92,130,.1)}.dact:active{transform:scale(.95)}
+.dact b{font-weight:600;color:var(--sec)}
+.reset{background:none;border:0;color:var(--sec);text-decoration:underline;cursor:pointer;min-height:44px}
+.nudge{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1.2rem;margin-top:1rem;padding:1rem 1.2rem;border-radius:18px;background:linear-gradient(135deg,rgba(236,92,130,.18),rgba(244,183,64,.12));border:1px solid rgba(244,183,64,.3);max-height:0;opacity:0;overflow:hidden;padding-block:0;border-width:0;transition:max-height .6s var(--ease),opacity .5s,padding .5s}
+.nudge.ver{max-height:200px;opacity:1;padding-block:1rem;border-width:1px}
+.dphone{width:min(340px,100%);margin-inline:auto;border-radius:32px;padding:1.3rem;background:linear-gradient(180deg,#1d1722,#14101a);border:1px solid rgba(255,255,255,.12);box-shadow:0 40px 80px -30px rgba(236,92,130,.45)}
+.dcard{border-radius:22px;padding:1.2rem 1.3rem;background:linear-gradient(135deg,#C2436A,#8F2E4E);box-shadow:0 18px 40px -16px rgba(236,92,130,.7)}
+.dcard small{opacity:.85;font-size:.82rem}.dbal{font:800 2.2rem Sora;letter-spacing:-.03em;line-height:1.2;transition:color .3s}
+.dbal.neg{color:#ffd2d2}
+.dlist{list-style:none;margin:1rem 0 0;padding:0;display:grid;gap:.55rem;max-height:290px;overflow:hidden}
+.dlist li{display:flex;align-items:center;gap:.8rem;padding:.7rem .85rem;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--ln);animation:entra .6s var(--ease)}
+@keyframes entra{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:none}}
+.dlist .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:.95rem;flex:none}
+.dlist .g .ic{background:rgba(236,92,130,.18);color:#ff8fae}.dlist .r .ic{background:rgba(95,214,160,.18);color:var(--verde)}
+.dlist .t{flex:1;min-width:0;font:600 .93rem Inter}.dlist .t small{display:block;font:400 .76rem Inter;color:var(--sec)}
+.dlist .v{font:700 .92rem Sora}.dlist .g .v{color:#ff8fae}.dlist .r .v{color:var(--verde)}
+
+/* bento */
+.bento{display:grid;gap:1.1rem;margin-top:3.2rem}
+@media(min-width:760px){.bento{grid-template-columns:repeat(6,1fr)}.b1{grid-column:span 4}.b2{grid-column:span 2}.b3{grid-column:span 2}.b4{grid-column:span 2}.b5{grid-column:span 2}.b6{grid-column:span 3}.b7{grid-column:span 3}}
+.bc{position:relative;overflow:hidden;border-radius:28px;padding:1.7rem;min-height:230px;background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.015));border:1px solid var(--ln);display:flex;flex-direction:column;justify-content:space-between;gap:1.2rem;transition:border-color .3s,transform .4s var(--ease)}
+.bc:hover{border-color:rgba(255,255,255,.2);transform:translateY(-4px)}
+.bc::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(236,92,130,.2),transparent 45%);opacity:0;transition:opacity .3s}.bc:hover::before{opacity:1}
+.bc h3{margin:0 0 .35rem}.bc p{color:var(--sec);margin:0;font-size:.95em}
+.term{font:500 .98rem/1.9 ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;color:var(--sec);position:relative;height:3.8rem}
+.term span{position:absolute;left:0;opacity:0;animation:ciclo 9s infinite}.term span:nth-child(2){animation-delay:3s}.term span:nth-child(3){animation-delay:6s}
+.term b{color:var(--verde);font-weight:500}
+@keyframes ciclo{0%{opacity:0;transform:translateY(8px)}6%,30%{opacity:1;transform:none}36%,100%{opacity:0;transform:translateY(-8px)}}
+.kz{font:800 clamp(4rem,9vw,6rem)/1 Sora;letter-spacing:-.05em;animation:flt 6s ease-in-out infinite;width:fit-content}
+.sw{width:78px;height:40px;border-radius:99px;background:rgba(255,255,255,.12);position:relative;flex:none}.sw::after{content:"";position:absolute;left:5px;top:5px;width:30px;height:30px;border-radius:50%;background:var(--ouro);animation:sw 6s var(--ease) infinite}
+@keyframes sw{0%,40%{transform:none}50%,90%{transform:translateX(38px);background:var(--rosa)}100%{transform:none}}
+.trocar{display:flex;align-items:center;gap:1rem}.trocar .lb{position:relative;height:1.5em;flex:1;font:700 1.05rem Sora}.trocar .lb span{position:absolute;left:0;animation:lb 6s infinite}
+.trocar .lb span+span{animation-name:lb2}
+@keyframes lb{0%,42%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}
+@keyframes lb2{0%,42%{opacity:0}50%,92%{opacity:1}100%{opacity:0}}
+.metas{display:grid;gap:.9rem}.metas div{display:grid;gap:.4rem;font:600 .86rem Inter}
+.metas .bar i{width:0}.js .bento.in .metas .bar i,.no-js .metas .bar i{width:var(--w)}
+.metas .bar i{transition-delay:.5s}
+.ico{width:46px;height:46px;color:var(--ouro)}
+.spin{animation:giro 9s linear infinite}
+.draw path,.draw rect{stroke-dasharray:90;stroke-dashoffset:90;animation:desenha 3.2s var(--ease) infinite alternate}
+@keyframes desenha{to{stroke-dashoffset:0}}
+
+/* instalar */
+.tabs{display:inline-flex;padding:.35rem;border-radius:16px;background:var(--glass);border:1px solid var(--ln);margin:2rem auto 0;gap:.2rem}
+.tabs button{min-height:44px;padding:.5rem 1.5rem;border-radius:12px;border:0;background:none;cursor:pointer;font:600 .95rem Inter;color:var(--sec);transition:background .3s,color .3s}
+.tabs button[aria-selected=true]{background:linear-gradient(135deg,var(--rosa),var(--rosa2));color:#fff;box-shadow:0 10px 24px -10px rgba(236,92,130,.8)}
+.panel{margin-top:2rem;display:grid;gap:1rem;max-width:760px;margin-inline:auto;animation:entra .6s var(--ease)}
+.panel[hidden]{display:none}
+.stp{display:flex;gap:1.1rem;align-items:flex-start;padding:1.2rem 1.3rem;border-radius:20px;background:var(--glass);border:1px solid var(--ln)}
+.stp .nn{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font:800 1rem Sora;background:rgba(244,183,64,.14);color:var(--ouro)}
+.stp p{margin:0;color:var(--sec)}.stp strong{color:var(--tx)}
+.apk{padding:1.3rem;border-radius:20px;border:1px dashed rgba(255,255,255,.2);text-align:center}
+.apk small{display:block;color:var(--sec);margin-top:.8rem;font-size:.85rem;line-height:1.5}
+
+/* faq */
+.faq{max-width:780px;margin:2.5rem auto 0;display:grid;gap:.8rem}
+.fq{border-radius:20px;background:var(--glass);border:1px solid var(--ln);transition:border-color .3s,background .3s}
+.fq.open{border-color:rgba(236,92,130,.45);background:rgba(236,92,130,.06)}
+.fq button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:1rem;text-align:left;background:none;border:0;cursor:pointer;padding:1.15rem 1.3rem;font:700 1.02rem Sora,sans-serif;min-height:60px}
+.fq .pl{flex:none;width:28px;height:28px;position:relative}.fq .pl::before,.fq .pl::after{content:"";position:absolute;left:5px;right:5px;top:50%;height:2px;background:var(--rosa);border-radius:2px;transition:transform .4s var(--ease)}
+.fq .pl::after{transform:rotate(90deg)}.fq.open .pl::after{transform:rotate(0)}
+.ac{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--ease)}.fq.open .ac{grid-template-rows:1fr}
+.ac>div{overflow:hidden}.ac p{padding:0 1.3rem 1.2rem;color:var(--sec);margin:0}
+
+/* cta final */
+.final{padding-block:clamp(3rem,7vw,6rem)}
+.fcard{position:relative;overflow:hidden;border-radius:40px;padding:clamp(3rem,7vw,5.5rem) 1.5rem;text-align:center;background:linear-gradient(135deg,#C2436A,#7a2447 55%,#3b1226);border:1px solid rgba(255,255,255,.18);box-shadow:0 60px 120px -50px rgba(236,92,130,.7)}
+.fcard::before{content:"";position:absolute;width:60%;aspect-ratio:1;left:-10%;top:-40%;border-radius:50%;background:radial-gradient(circle,rgba(244,183,64,.45),transparent 65%);animation:b1 14s ease-in-out infinite alternate}
+.fcard>*{position:relative}
+.fcard p{opacity:.92;max-width:34em;margin-inline:auto}
+.fcard .porco{width:120px;margin:0 auto 1.2rem;animation:flt 5s ease-in-out infinite;filter:drop-shadow(0 20px 24px rgba(0,0,0,.4))}
+.moeda{position:absolute;bottom:-40px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe29a,#e0a02e);color:#6b4600;font:800 .62rem Sora;display:grid;place-items:center;opacity:0;animation:sobe 9s linear infinite}
+@keyframes sobe{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.9}100%{transform:translateY(-520px) rotate(360deg);opacity:0}}
+.fcard .moeda:nth-of-type(1){left:8%;animation-delay:0s}.fcard .moeda:nth-of-type(2){left:24%;animation-delay:2.4s;width:26px;height:26px}.fcard .moeda:nth-of-type(3){left:70%;animation-delay:1.2s}.fcard .moeda:nth-of-type(4){left:88%;animation-delay:4s;width:28px;height:28px}.fcard .moeda:nth-of-type(5){left:46%;animation-delay:5.5s;width:24px;height:24px}
+#feedback{display:none}
+
+footer{padding:2.5rem 0 7rem;border-top:1px solid var(--ln);font-size:.9rem;color:var(--sec)}
+footer a{color:var(--sec)}footer a:hover{color:var(--tx)}footer nav{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin:.7rem 0}
+
+.fixa{position:fixed;inset:auto 0 0 0;z-index:110;padding:.7rem 1rem max(.7rem,env(safe-area-inset-bottom));background:rgba(11,9,13,.82);backdrop-filter:blur(14px);border-top:1px solid var(--ln);transform:translateY(110%);transition:transform .35s var(--ease)}
+.fixa.ver{transform:none}.fixa .btn{width:100%}
+@media(min-width:900px){.fixa{display:none}}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .js .rv,.js .hero h1 .w,.js .hero .in-up{opacity:1!important;transform:none!important;filter:none!important}
+  .mq-t{animation:none}.sstep{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<a class="salto" href="#conteudo">Saltar para o conteúdo</a>
+<div id="prog" aria-hidden="true"></div>
+<div class="mesh" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grao" aria-hidden="true"></div>
+
+<header class="hd" id="hd">
+  <div class="wrap topo">
+    <a class="marca" href="#"><img src="img/porquinho.png" alt="" width="36" height="36"><span class="nome">Cofrinho <b>AO</b></span></a>
+    <div style="display:flex;align-items:center;gap:.8rem"><span class="selo"><i></i>v1 experimental</span><a class="btn btn-p mag" data-app href="#">Abrir o app</a></div>
+  </div>
+</header>
+
+<main id="conteudo">
+<!-- ====== HERO ====== -->
+<div class="hero" id="hero"><div class="wrap">
+  <div>
+    <span class="selo in-up" style="--d:.1s;margin-bottom:1.4rem"><i></i>Versão experimental · gratuita</span>
+    <h1 aria-label="Sabe para onde vai o teu dinheiro.">
+      <span class="w" style="--i:0">Sabe</span> <span class="w" style="--i:1">para</span> <span class="w" style="--i:2">onde</span> <span class="w" style="--i:3">vai</span> <span class="w" style="--i:4">o</span> <span class="w" style="--i:5">teu</span> <span class="w gr" style="--i:6">dinheiro.</span>
+    </h1>
+    <p class="sub in-up" style="--d:.95s">O Cofrinho AO regista os teus gastos e receitas em Kwanzas, mostra gráficos por categoria e ajuda-te a poupar para as tuas metas. Funciona mesmo sem internet.</p>
+    <div class="ctas in-up" id="topo-ctas" style="--d:1.1s">
+      <a class="btn btn-p mag" data-app href="#" id="cta-principal">Abrir o app agora <span class="sta">→</span></a>
+      <a class="btn btn-s" data-apk href="#instalar">Baixar APK (Android)</a>
+    </div>
+    <p class="micro in-up" style="--d:1.25s"><span>Gratuito na versão experimental</span><span>Sem anúncios</span><span>Sem cartão</span></p>
+  </div>
+  <div class="scene in-up" style="--d:.5s" id="scene">
+    <div class="ring" aria-hidden="true"></div>
+    <div class="tilt" id="tilt"><div class="float">
+      <div class="phone"><img src="img/inicio.webp" width="520" height="1125" fetchpriority="high" alt="Ecrã inicial do Cofrinho AO com o saldo em Kwanzas, entradas, saídas e a lista de movimentos"></div>
+    </div></div>
+    <div class="chip c1" aria-hidden="true"><span class="ic">↗</span><span>+ 150.000 Kz<small>Salário recebido</small></span></div>
+    <div class="chip c2" aria-hidden="true"><span>Meta · Telemóvel novo <small>36% poupado</small></span><div class="bar"><i></i></div></div>
+    <div class="chip c3" aria-hidden="true"><span class="ic">◌</span><span>Sem internet?<small>Regista na mesma</small></span></div>
+  </div>
+  <span class="rolar" aria-hidden="true"></span>
+</div></div>
+
+<div class="mq" aria-hidden="true"><div class="mq-t">
+  <span>Feito para Angola</span><span>Em Kwanzas</span><span>Funciona offline</span><span>Pessoal e negócio</span><span>Metas de poupança</span><span>Gráficos por categoria</span><span>Sincroniza sozinho</span><span>Os teus dados são teus</span>
+  <span>Feito para Angola</span><span>Em Kwanzas</span><span>Funciona offline</span><span>Pessoal e negócio</span><span>Metas de poupança</span><span>Gráficos por categoria</span><span>Sincroniza sozinho</span><span>Os teus dados são teus</span>
+</div></div>
+
+<!-- ====== COMO FUNCIONA ====== -->
+<section id="como"><div class="wrap">
+  <div class="centro rv"><span class="eyebrow">Como funciona</span><h2>Começa em <span class="gr">três passos</span></h2><p class="sec">Sem instalar nada da loja e sem papelada.</p></div>
+  <div class="passos rv" id="passos">
+    <div class="linha" aria-hidden="true"><i></i></div>
+    <div class="passo rv" style="--d:.05s"><div class="n">1</div><h3>Abre o app</h3><p>Toca em “Abrir o app”. Abre no teu telemóvel ou no computador.</p></div>
+    <div class="passo rv" style="--d:.2s"><div class="n">2</div><h3>Cria a tua conta</h3><p>Com o teu email. Recebes um código para confirmar.</p></div>
+    <div class="passo rv" style="--d:.35s"><div class="n">3</div><h3>Regista o primeiro gasto</h3><p>Um toque em “+ Gasto”, o valor e a categoria. O saldo actualiza logo.</p></div>
+  </div>
+</div></section>
+
+<!-- ====== RECURSOS (telemóvel fixo) ====== -->
+<section id="recursos"><div class="wrap">
+  <div class="centro rv"><span class="eyebrow">Recursos</span><h2>Tudo o que precisas, <span class="gr">nada que atrapalhe</span></h2></div>
+  <div class="story-grid">
+    <div class="story-steps">
+      <article class="sstep act" data-i="0"><span class="eyebrow">01 · Registo</span><h3 style="font-size:clamp(1.6rem,3vw,2.3rem)">Regista em segundos</h3><p>Gastos e receitas com um toque, com categorias prontas (Alimentação, Transporte, Casa…). Filtra por hoje, semana ou mês.</p>
+        <div class="m-phone"><div class="phone"><img src="img/registo.webp" width="520" height="1125" loading="lazy" alt="Formulário para registar um gasto com valor, categoria e descrição"></div></div></article>
+      <article class="sstep" data-i="1"><span class="eyebrow">02 · Gráficos</span><h3 style="font-size:clamp(1.6rem,3vw,2.3rem)">Vê para onde vai o dinheiro</h3><p>Um gráfico por categoria mostra o que pesa mais no teu mês, com percentagens e valores em Kz.</p>
+        <div class="m-phone"><div class="phone"><img src="img/grafico.webp" width="520" height="1125" loading="lazy" alt="Gráfico de gastos por categoria com legenda em Kwanzas"></div></div></article>
+      <article class="sstep" data-i="2"><span class="eyebrow">03 · Metas</span><h3 style="font-size:clamp(1.6rem,3vw,2.3rem)">Poupa para as tuas metas</h3><p>Cria uma meta (um telemóvel, um fundo de emergência) e vai juntando. Cada valor que guardas fica registado nos teus gastos.</p>
+        <div class="m-phone"><div class="phone"><img src="img/metas.webp" width="520" height="1125" loading="lazy" alt="Metas de poupança com barra de progresso"></div></div></article>
+      <article class="sstep" data-i="3"><span class="eyebrow">04 · Negócio</span><h3 style="font-size:clamp(1.6rem,3vw,2.3rem)">Também para o teu negócio</h3><p>Muda para o modo Negócio e passa a ver Lucro, Faturação e Despesas, com categorias próprias para vendas, fornecedores e impostos.</p>
+        <div class="m-phone"><div class="phone"><img src="img/negocio.webp" width="520" height="1125" loading="lazy" alt="Modo Negócio com lucro, faturação e despesas"></div></div></article>
+    </div>
+    <div class="story-sticky">
+      <div class="float"><div class="phone"><div class="stack">
+        <img class="on" src="img/registo.webp" width="520" height="1125" alt="Formulário para registar um gasto">
+        <img src="img/grafico.webp" width="520" height="1125" loading="lazy" alt="Gráfico de gastos por categoria">
+        <img src="img/metas.webp" width="520" height="1125" loading="lazy" alt="Metas de poupança">
+        <img src="img/negocio.webp" width="520" height="1125" loading="lazy" alt="Modo Negócio">
+      </div></div></div>
+      <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+  </div>
+  <p class="sec centro" style="margin-top:1.5rem;font-size:.85rem">Os ecrãs mostram dados de exemplo.</p>
+</div></section>
+
+<!-- ====== DEMO INTERACTIVA ====== -->
+<section id="demo"><div class="wrap demo-grid">
+  <div class="rv">
+    <span class="eyebrow">Experimenta</span>
+    <h2>Sente como é registar. <span class="gr">Sem criar conta.</span></h2>
+    <p class="sec">Toca nos botões e vê o saldo a mexer em tempo real. É uma demonstração: nada fica guardado.</p>
+    <div class="acts" role="group" aria-label="Acções da demonstração">
+      <button class="dact" data-add="Almoço|Alimentação|-2500|🍽">+ Almoço <b>2.500</b></button>
+      <button class="dact" data-add="Táxi|Transporte|-1500|🚕">+ Táxi <b>1.500</b></button>
+      <button class="dact" data-add="Recarga|Telecom|-1000|📱">+ Recarga <b>1.000</b></button>
+      <button class="dact" data-add="Salário|Receita|150000|💼">+ Salário <b>150.000</b></button>
+    </div>
+    <button class="reset" id="demo-reset" type="button">Recomeçar</button>
+    <div class="nudge" id="nudge"><span><strong>Gostaste?</strong> Agora regista os teus de verdade.</span><a class="btn btn-p" data-app href="#" style="min-height:46px;padding:.5rem 1.2rem">Abrir o app →</a></div>
+  </div>
+  <div class="dphone rv" style="--d:.15s">
+    <div class="dcard"><small>Saldo actual</small><div class="dbal" id="dbal" aria-live="polite">48.000 Kz</div></div>
+    <ul class="dlist" id="dlist">
+      <li class="g"><span class="ic">🍽</span><span class="t">Alimentação<small>Hoje</small></span><span class="v">-32.500 Kz</span></li>
+      <li class="r"><span class="ic">💼</span><span class="t">Venda<small>Hoje</small></span><span class="v">+20.000 Kz</span></li>
+    </ul>
+  </div>
+</div></section>
+
+<!-- ====== BENTO ====== -->
+<section id="porque"><div class="wrap">
+  <div class="centro rv"><span class="eyebrow">Porquê o Cofrinho AO</span><h2>Pensado para o <span class="gr">dia-a-dia</span></h2></div>
+  <div class="bento rv" id="bento">
+    <div class="bc b1"><div class="term" aria-hidden="true"><span>$ modo-aviao --ligado</span><span><b>&gt; registo guardado ✓</b></span><span>&gt; a sincronizar quando houver rede…</span></div><div><h3>Funciona sem internet</h3><p>Regista offline. Quando houver rede, os dados sincronizam sozinhos.</p></div></div>
+    <div class="bc b2"><div class="kz gr" aria-hidden="true">Kz</div><div><h3>Em Kwanzas</h3><p>Valores e formatos como tu usas.</p></div></div>
+    <div class="bc b3"><div class="trocar" aria-hidden="true"><div class="sw"></div><div class="lb"><span>Saldo actual</span><span>Lucro actual</span></div></div><div><h3>Pessoal ou negócio</h3><p>Dois modos, cada um com os seus termos e categorias.</p></div></div>
+    <div class="bc b4"><div class="metas" aria-hidden="true"><div>Telemóvel novo<span class="bar"><i style="--w:36%"></i></span></div><div>Fundo de emergência<span class="bar"><i style="--w:30%"></i></span></div><div>Viagem<span class="bar"><i style="--w:25%"></i></span></div></div><div><h3>Metas de poupança</h3><p>Vê o progresso a crescer.</p></div></div>
+    <div class="bc b5"><svg class="ico draw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><div><h3>Os teus dados são teus</h3><p>Exporta tudo ou elimina a conta quando quiseres.</p></div></div>
+    <div class="bc b6"><svg class="ico spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-15-6.7L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/><path d="M16 16h5v5"/></svg><div><h3>Sincroniza sozinho</h3><p>Começa no telemóvel e continua no computador, com a mesma conta.</p></div></div>
+    <div class="bc b7"><div class="micro" style="display:grid;gap:.5rem;font-size:1rem;color:var(--tx)"><span>Sem anúncios</span><span>Sem cartão</span><span>Gratuito na versão experimental</span></div><div><h3>Simples e honesto</h3><p>Sem letras pequenas. Se um dia houver planos pagos, avisamos antes e mostramos o preço total.</p></div></div>
+  </div>
+</div></section>
+
+<!-- ====== INSTALAR ====== -->
+<section id="instalar"><div class="wrap">
+  <div class="centro rv"><span class="eyebrow">Instalar</span><h2>Instala no teu <span class="gr">telemóvel</span></h2><p class="sec">O Cofrinho AO instala-se a partir do navegador e abre como uma app.</p>
+    <div class="tabs" role="tablist" aria-label="Sistema do telemóvel"><button role="tab" id="t-and" aria-selected="true" aria-controls="p-and">Android</button><button role="tab" id="t-ios" aria-selected="false" aria-controls="p-ios" tabindex="-1">iPhone</button></div>
+  </div>
+  <div class="panel" id="p-and" role="tabpanel" aria-labelledby="t-and">
+    <div class="stp"><span class="nn">1</span><p>Abre o app no <strong>Chrome</strong>.</p></div>
+    <div class="stp"><span class="nn">2</span><p>Toca no menu ⋮ e em <strong>Instalar app</strong> (ou usa o botão <em>Instalar</em> em Definições).</p></div>
+    <div class="stp"><span class="nn">3</span><p>Abre pelo ícone no ecrã principal.</p></div>
+    <div class="apk"><a class="btn btn-s" data-apk href="#instalar" id="btn-apk">Baixar APK</a><small id="nota-apk">O APK ainda não está disponível. Enquanto isso, instala pelo Chrome como acima.</small></div>
+  </div>
+  <div class="panel" id="p-ios" role="tabpanel" aria-labelledby="t-ios" hidden>
+    <div class="stp"><span class="nn">1</span><p>Abre o app no <strong>Safari</strong>.</p></div>
+    <div class="stp"><span class="nn">2</span><p>Toca no botão <strong>Partilhar</strong> (quadrado com seta).</p></div>
+    <div class="stp"><span class="nn">3</span><p>Escolhe <strong>Adicionar ao ecrã principal</strong>.</p></div>
+    <p class="sec" style="text-align:center;font-size:.9rem">No iPhone a instalação só funciona no Safari.</p>
+  </div>
+</div></section>
+
+<!-- ====== FAQ ====== -->
+<section id="faq"><div class="wrap">
+  <div class="centro rv"><span class="eyebrow">Dúvidas</span><h2>Perguntas <span class="gr">frequentes</span></h2></div>
+  <div class="faq rv" id="faqlist">
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f1" id="q1">É grátis?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f1" role="region" aria-labelledby="q1"><div><p>Sim, na versão experimental. Se um dia houver planos pagos, avisamos antes e mostramos o preço total em Kwanzas.</p></div></div></div>
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f2" id="q2">Preciso de internet?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f2" role="region" aria-labelledby="q2"><div><p>Não para registar os teus movimentos: ficam guardados no telemóvel. A internet é precisa para criar a conta e para sincronizar entre dispositivos, o que acontece sozinho quando houver rede.</p></div></div></div>
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f3" id="q3">Os meus dados estão seguros?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f3" role="region" aria-labelledby="q3"><div><p>A ligação é cifrada (HTTPS) e a tua senha é guardada de forma irreversível. Podes exportar os teus dados ou eliminar a conta quando quiseres, em Definições. Lê a <a data-legal="privacidade.html" href="#">Política de Privacidade</a>.</p></div></div></div>
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f4" id="q4">O que é “versão experimental”?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f4" role="region" aria-labelledby="q4"><div><p>Ainda estamos a melhorar. Pode haver erros, e a tua opinião ajuda muito: diz-nos o que falta.</p></div></div></div>
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f5" id="q5">Funciona no iPhone e no computador?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f5" role="region" aria-labelledby="q5"><div><p>Sim. No iPhone instala-se pelo Safari; no computador abre no navegador.</p></div></div></div>
+    <div class="fq"><button type="button" aria-expanded="false" aria-controls="f6" id="q6">Quem faz o Cofrinho AO?<span class="pl" aria-hidden="true"></span></button><div class="ac" id="f6" role="region" aria-labelledby="q6"><div><p>A Liv Solution, uma startup digital angolana que também cria sites, design e gestão de redes sociais.</p></div></div></div>
+  </div>
+</div></section>
+
+<!-- ====== CTA FINAL ====== -->
+<section class="final"><div class="wrap">
+  <div class="fcard rv">
+    <span class="moeda" aria-hidden="true">Kz</span><span class="moeda" aria-hidden="true">Kz</span><span class="moeda" aria-hidden="true">Kz</span><span class="moeda" aria-hidden="true">Kz</span><span class="moeda" aria-hidden="true">Kz</span>
+    <img class="porco" src="img/porquinho.png" width="120" height="120" loading="lazy" alt="">
+    <h2>Começa hoje a organizar o teu dinheiro.</h2>
+    <p>Leva menos de um minuto a abrir. É grátis nesta versão experimental.</p>
+    <div class="ctas" style="justify-content:center"><a class="btn btn-p mag" data-app href="#">Abrir o app agora <span class="sta">→</span></a><a class="btn btn-s" id="feedback" href="#">Dar feedback no WhatsApp</a></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <strong style="color:var(--tx)">Cofrinho AO</strong> · versão experimental · feito pela Liv Solution
+  <nav aria-label="Informação legal"><a data-legal="privacidade.html" href="#">Privacidade</a><a data-legal="termos.html" href="#">Termos de Uso</a><a data-legal="armazenamento.html" href="#">Armazenamento local</a></nav>
+</div></footer>
+
+<div class="fixa" id="fixa"><a class="btn btn-p" data-app href="#">Abrir o app</a></div>
+
+<script>
+/* ===== CONFIGURAÇÃO — o único sítio que precisas de editar ===== */
+var CONFIG = {
+  appUrl:   "https://cofrinho-iota.vercel.app/",  // onde está o app
+  apkUrl:   "",                                    // ex.: "downloads/cofrinho-ao-v1.0.0.apk" (vazio = "em breve")
+  apkInfo:  "",                                    // ex.: "v1.0.0 · 4 MB"
+  whatsapp: ""                                     // ex.: "244923000000" (vazio = botão escondido)
+};
+/* ================================================================ */
+(function(){
+  window.__ok = 1;
+  var $ = function(s, r){ return (r||document).querySelector(s); }, $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ratoFino = window.matchMedia("(pointer:fine)").matches;
+
+  /* --- ligações e configuração --- */
+  var utm = location.search || "";
+  $$("[data-app]").forEach(function(a){ a.href = CONFIG.appUrl + utm; });
+  $$("[data-legal]").forEach(function(a){ a.href = CONFIG.appUrl + a.getAttribute("data-legal"); a.target = "_blank"; a.rel = "noopener"; });
+  var nota = $("#nota-apk");
+  $$("[data-apk]").forEach(function(a){
+    if (CONFIG.apkUrl) { a.href = CONFIG.apkUrl; a.setAttribute("download", ""); }
+    else { a.setAttribute("aria-disabled", "true"); a.textContent = "APK em breve"; a.addEventListener("click", function(e){ e.preventDefault(); $("#instalar").scrollIntoView(); }); }
+  });
+  if (CONFIG.apkUrl && nota) nota.textContent = (CONFIG.apkInfo ? CONFIG.apkInfo + ". " : "") + "Ao instalar, o Android pode pedir para permitires instalações desta origem. Só instala ficheiros que descarregues deste site.";
+  if (CONFIG.whatsapp) { var f = $("#feedback"); f.style.display = "inline-flex"; f.href = "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent("Olá! Feedback sobre o Cofrinho AO: "); }
+  var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/i.test(ua), and = /Android/i.test(ua);
+  if (!and) $$("#topo-ctas [data-apk]").forEach(function(a){ a.style.display = "none"; });
+
+  /* --- barra de progresso, cabeçalho e barra fixa --- */
+  var prog = $("#prog"), hd = $("#hd"), ticking = false;
+  function aoRolar(){
+    var y = window.scrollY, max = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+    hd.classList.toggle("s", y > 30);
+    ticking = false;
+  }
+  addEventListener("scroll", function(){ if (!ticking) { ticking = true; requestAnimationFrame(aoRolar); } }, { passive: true });
+  aoRolar();
+  var topo = $("#topo-ctas"), fixa = $("#fixa");
+  if ("IntersectionObserver" in window && topo) new IntersectionObserver(function(e){ fixa.classList.toggle("ver", !e[0].isIntersecting && e[0].boundingClientRect.top < 0); }).observe(topo);
+
+  /* --- aparecer ao rolar --- */
+  var rvs = $$(".rv");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: .15, rootMargin: "0px 0px -6% 0px" });
+    rvs.forEach(function(el){ io.observe(el); });
+  } else rvs.forEach(function(el){ el.classList.add("in"); });
+
+  /* --- telemóvel do hero inclina com o rato --- */
+  var tilt = $("#tilt"), scene = $("#scene");
+  if (tilt && ratoFino && !reduzir) {
+    scene.addEventListener("pointermove", function(e){
+      var r = scene.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      tilt.style.setProperty("--ry", (x * 16).toFixed(2) + "deg"); tilt.style.setProperty("--rx", (-y * 12).toFixed(2) + "deg");
+    });
+    scene.addEventListener("pointerleave", function(){ tilt.style.setProperty("--ry", "0deg"); tilt.style.setProperty("--rx", "0deg"); });
+  }
+
+  /* --- botões magnéticos e brilho nos cartões --- */
+  if (ratoFino && !reduzir) $$(".mag").forEach(function(b){
+    b.addEventListener("pointermove", function(e){ var r = b.getBoundingClientRect(); b.style.transform = "translate(" + ((e.clientX - r.left - r.width / 2) * .18).toFixed(1) + "px," + ((e.clientY - r.top - r.height / 2) * .28).toFixed(1) + "px)"; });
+    b.addEventListener("pointerleave", function(){ b.style.transform = ""; });
+  });
+  $$(".bc").forEach(function(c){ c.addEventListener("pointermove", function(e){ var r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px"); }); });
+
+  /* --- recursos: o telemóvel fica fixo e o ecrã muda --- */
+  var steps = $$(".sstep"), imgs = $$(".stack img"), dots = $$(".dots i");
+  function ativar(i){
+    steps.forEach(function(s, k){ s.classList.toggle("act", k === i); });
+    imgs.forEach(function(m, k){ m.classList.toggle("on", k === i); });
+    dots.forEach(function(d, k){ d.classList.toggle("on", k === i); });
+  }
+  if ("IntersectionObserver" in window && steps.length) {
+    var so = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) ativar(steps.indexOf(e.target)); }); }, { rootMargin: "-42% 0px -42% 0px" });
+    steps.forEach(function(s){ so.observe(s); });
+  }
+
+  /* --- demo interactiva --- */
+  var bal = 48000, shown = 48000, tw = 0, dbal = $("#dbal"), dlist = $("#dlist"), acoes = 0, nudge = $("#nudge");
+  function fmt(n){ var neg = n < 0, s = Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); return (neg ? "-" : "") + s + " Kz"; }
+  function anima(para){
+    cancelAnimationFrame(tw);
+    if (reduzir) { shown = para; dbal.textContent = fmt(para); dbal.classList.toggle("neg", para < 0); return; }
+    var de = shown, t0 = performance.now(), dur = 700;
+    (function passo(t){ var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); shown = de + (para - de) * e; dbal.textContent = fmt(shown); dbal.classList.toggle("neg", shown < 0); if (p < 1) tw = requestAnimationFrame(passo); })(t0);
+  }
+  var inicial = dlist.innerHTML;
+  $$("[data-add]").forEach(function(b){ b.addEventListener("click", function(){
+    var p = b.getAttribute("data-add").split("|"), v = parseInt(p[2], 10), li = document.createElement("li");
+    li.className = v < 0 ? "g" : "r";
+    li.innerHTML = '<span class="ic"></span><span class="t"></span><span class="v"></span>';
+    li.children[0].textContent = p[3]; li.children[1].innerHTML = p[0] + "<small></small>"; li.children[1].querySelector("small").textContent = p[1]; li.children[2].textContent = (v > 0 ? "+" : "") + fmt(v);
+    dlist.insertBefore(li, dlist.firstChild);
+    while (dlist.children.length > 5) dlist.removeChild(dlist.lastChild);
+    bal += v; anima(bal); acoes++;
+    if (acoes >= 3) nudge.classList.add("ver");
+  }); });
+  $("#demo-reset").addEventListener("click", function(){ bal = 48000; anima(bal); dlist.innerHTML = inicial; acoes = 0; nudge.classList.remove("ver"); });
+
+  /* --- separadores Android / iPhone --- */
+  var tAnd = $("#t-and"), tIos = $("#t-ios"), pAnd = $("#p-and"), pIos = $("#p-ios");
+  function separador(qual){
+    var a = qual === "and";
+    tAnd.setAttribute("aria-selected", a); tIos.setAttribute("aria-selected", !a); tAnd.tabIndex = a ? 0 : -1; tIos.tabIndex = a ? -1 : 0;
+    pAnd.hidden = !a; pIos.hidden = a;
+  }
+  tAnd.addEventListener("click", function(){ separador("and"); }); tIos.addEventListener("click", function(){ separador("ios"); });
+  [tAnd, tIos].forEach(function(t){ t.addEventListener("keydown", function(e){ if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var a = t === tIos; separador(a ? "and" : "ios"); (a ? tAnd : tIos).focus(); } }); });
+  if (ios) separador("ios");
+
+  /* --- perguntas frequentes --- */
+  $$(".fq button").forEach(function(b){ b.addEventListener("click", function(){
+    var fq = b.parentNode, abre = !fq.classList.contains("open");
+    $$(".fq.open").forEach(function(o){ o.classList.remove("open"); o.querySelector("button").setAttribute("aria-expanded", "false"); });
+    if (abre) { fq.classList.add("open"); b.setAttribute("aria-expanded", "true"); }
+  }); });
+})();
+</script>
+</body>
+</html>

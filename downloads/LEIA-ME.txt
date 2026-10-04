@@ -1,0 +1,1 @@
+Coloca aqui o ficheiro APK (ex.: cofrinho-ao-v1.0.0.apk) e define CONFIG.apkUrl no index.html.
